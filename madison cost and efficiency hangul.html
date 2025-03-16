@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>프로젝트 MADISON: AI vs 인간 상담사 비교</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Malgun Gothic', 'Segoe UI', Arial, sans-serif;
+      background: #F0ECE4; /* 따뜻한 회색 배경 */
+      margin: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #fff; /* 순수 흰색 컨테이너 배경 */
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.07);
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 28px;
+    }
+    h2 {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 0;
+      color: #7f8c8d;
+      font-weight: normal;
+      margin-bottom: 25px;
+    }
+    .chart-container {
+      margin: 35px 0;
+      padding: 20px;
+      background: #F0ECE4; /* 따뜻한 회색 */
+      border-radius: 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    .chart-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      background: white;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid #eaeaea;
+    }
+    th {
+      background: #f5f5f5; /* 매우 밝은 회색 테이블 헤더 */
+      color: #333;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.5px;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+    .notes {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 30px;
+      line-height: 1.6;
+    }
+    .highlight {
+      background-color: #f9f9f9; /* 매우 밝은 회색 강조 */
+      padding: 18px;
+      border-radius: 8px;
+      border-left: 4px solid #2980b9; /* 파란색 */
+      margin: 25px 0;
+    }
+    .key-metric {
+      font-weight: bold;
+      color: #2980b9; /* 파란색 */
+    }
+    .section-divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 40px 0;
+    }
+    .key-advantages {
+      font-size: 1.2em; /* 요청에 따른 더 큰 텍스트 */
+      line-height: 1.8;
+    }
+    .key-advantages li {
+      margin-bottom: 12px;
+    }
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      padding: 1px 15px;
+      margin: 20px 0;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.03);
+    }
+    .lg-green {
+      color: #38761d; /* 비용 분석용 녹색 */
+      font-weight: bold; /* 요청에 따라 굵게 표시 */
+    }
+    .lg-red {
+      color: #A50034; /* 헤리티지 레드 */
+    }
+    .chart-title {
+      margin-top: 0;
+      margin-bottom: 5px;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    .chart-subtitle {
+      text-align: center;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+      color: #7f8c8d;
+    }
+    .source-note {
+      font-size: 0.8em;
+      color: #999;
+      text-align: right;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+    /* 특정 테이블 요소에 대한 개선된 대비 */
+    .highlight-row {
+      background-color: #f6f3ed; /* 밝은 따뜻한 회색 */
+    }
+    .total-row {
+      font-weight: bold;
+      background-color: #f8f9fa;
+    }
+    .kpi-text {
+      font-family: 'Malgun Gothic', Arial, sans-serif;
+      font-weight: bold;
+      font-size: 1.15em;
+      color: #A50034; /* 헤리티지 레드로 변경 */
+    }
+    .lg-blue {
+      color: #3d87bd; /* 스카이 블루 */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>프로젝트 MADISON: AI vs 인간 상담사</h1>
+    <h2>종합 성능 및 비용 분석</h2>
+
+    <div class="highlight">
+      <p><strong>주요 요약:</strong> 한 대의 Tier-2 AI 상담사는 <span class="key-metric">68명의 인간 상담사</span>의 업무량을 처리할 수 있으며, 인간 상담사가 8시간 근무 동안 32건의 통화를 처리하는 것에 비해 <span class="key-metric">8시간 근무당 2,180건의 통화</span>를 처리합니다. 5년 동안 이는 <span class="key-metric">$1.59백만</span>의 비용 절감과 <span class="key-metric">$1.5백만</span>의 예상 수익 증가로 이어집니다.</p>
+    </div>
+
+    <!-- 섹션: 상담사 성능 비교 (차트 대신 테이블) -->
+    <div class="chart-container">
+      <h3 class="chart-title">상담사 성능: 근무 시간당 처리된 통화</h3>
+      <p class="chart-subtitle">
+        프로젝트 MADISON 구현의 실제 성능 데이터 기반
+      </p>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>성능 지표</th>
+              <th>Tier-2 AI 상담사</th>
+              <th>인간 상담사</th>
+              <th>성능 배수</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>시간당 통화 수</td>
+              <td>272.5</td>
+              <td>4</td>
+              <td class="lg-blue">68.1배</td>
+            </tr>
+            <tr class="highlight-row">
+              <td>8시간 근무당 통화 수</td>
+              <td>2,180</td>
+              <td>32</td>
+              <td class="lg-blue">68.1배</td>
+            </tr>
+            <tr>
+              <td>동시 통화 수</td>
+              <td>50</td>
+              <td>1</td>
+              <td class="lg-blue">50배</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="source-note">출처: LG전자 콜센터 성능 데이터, 2024-2025</p>
+    </div>
+
+    <!-- 섹션: 효율성 지표 -->
+    <div class="chart-container">
+      <h3 class="chart-title">효율성 지표 비교</h3>
+      <p class="chart-subtitle">
+        높은 점수가 더 나은 성능을 반영; 0-100 척도로 정규화된 지표
+      </p>
+      <canvas id="efficiencyChart"></canvas>
+      <p class="source-note">출처: 프로젝트 MADISON 파일럿 구현 결과, 2025년 3월</p>
+    </div>
+
+    <!-- 섹션: 5년간 운영 비용 -->
+    <div class="chart-container">
+      <h3 class="chart-title">5년간 누적 운영 비용</h3>
+      <p class="chart-subtitle">
+        인프라, 에너지 및 유지 보수를 포함한 총 운영 비용을 나타냄
+      </p>
+      <canvas id="costChart"></canvas>
+      <p class="source-note">출처: Alorica 재무 예측 모델, 2025년 1분기</p>
+    </div>
+
+    <!-- 섹션: 재무적 영향 -->
+    <div class="chart-container">
+      <h3 class="chart-title">5년간 총 재무적 영향</h3>
+      <p class="chart-subtitle">
+        재무적 이점의 종합적인 관점을 위한 비용 절감과 수익 증가 결합
+      </p>
+      <canvas id="impactChart"></canvas>
+      <p class="source-note">출처: LG전자/Alorica 공동 비즈니스 사례 분석, 2025</p>
+    </div>
+
+    <!-- 상세 비용 분석 테이블 -->
+    <div class="chart-container">
+      <h3 class="chart-title">5년 비용 상세 분석</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>비용 항목</th>
+              <th>AI 인프라 (USD)</th>
+              <th>인간 상담사 (USD)</th>
+              <th>절감액 (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>초기 하드웨어</td>
+              <td>10,000</td>
+              <td>해당 없음</td>
+              <td class="lg-green">-10,000</td>
+            </tr>
+            <tr>
+              <td>Tier-1 & Tier-2 AI (5년)</td>
+              <td>252,000</td>
+              <td>해당 없음</td>
+              <td class="lg-green">-252,000</td>
+            </tr>
+            <tr>
+              <td>SSD 저장소 (5년)</td>
+              <td>57,864</td>
+              <td>해당 없음</td>
+              <td class="lg-green">-57,864</td>
+            </tr>
+            <tr>
+              <td>에너지 비용 (5년)</td>
+              <td>18,731</td>
+              <td>해당 없음</td>
+              <td class="lg-green">-18,731</td>
+            </tr>
+            <tr class="highlight-row">
+              <td>인건비 (68명 × 5년)</td>
+              <td>해당 없음</td>
+              <td>1,917,600</td>
+              <td class="lg-green">1,917,600</td>
+            </tr>
+            <tr class="total-row">
+              <td>총계</td>
+              <td>328,595</td>
+              <td>1,917,600</td>
+              <td class="lg-green">1,589,005</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="source-note">출처: 현재 필리핀 BPO 시장 요율 기반 비용 분석, 2025년 1분기</p>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- 수익 증가 테이블 및 차트 (사용자가 좋아한 대로 유지) -->
+    <div class="chart-container">
+      <h3 class="chart-title">예상 수익 증가</h3>
+      <div style="display: flex; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 300px;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>기간</th>
+                  <th>수익 증가 (USD)</th>
+                  <th>백분율 증가</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>6개월</td>
+                  <td>100,000</td>
+                  <td>10%</td>
+                </tr>
+                <tr>
+                  <td>1년</td>
+                  <td>400,000</td>
+                  <td>40%</td>
+                </tr>
+                <tr class="highlight-row">
+                  <td>3년</td>
+                  <td>1,000,000</td>
+                  <td>100%</td>
+                </tr>
+                <tr>
+                  <td>5년</td>
+                  <td>1,500,000</td>
+                  <td>150%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <p class="source-note">출처: 개선된 고객 만족도 및 유지율 기반 수익 예측</p>
+    </div>
+
+    <div class="notes">
+      <h3 class="chart-title">주요 운영 이점</h3>
+      <ul class="key-advantages">
+        <li><span class="kpi-text">확장성:</span> 한 대의 Tier-2 AI 상담사는 평균 11분 지속되는 50개의 동시 통화를 처리할 수 있어, 시간당 272.5통화 또는 8시간 근무당 2,180통화를 처리합니다.</li>
+        <li><span class="kpi-text">24/7 운영:</span> AI 상담사는 피로, 결근 또는 성능 저하 없이 지속적으로 작동하여 99.9%의 가동 시간을 보장합니다.</li>
+        <li><span class="kpi-text">KPI 우수성:</span> AI 상담사는 인간 상담사가 유지하기 거의 불가능한 식스 시그마 수준(99.9997%)에서 핵심 성과 지표(KPI)를 지속적으로 충족합니다.</li>
+        <li><span class="kpi-text">에너지 효율:</span> 24/7 운영에도 불구하고, AI 인프라의 에너지 비용은 5년 동안 단지 $18,731이며, 연간 2%의 완만한 증가율을 보입니다.</li>
+        <li><span class="kpi-text">인적 자원 최적화:</span> 남아있는 인간 상담사(5%)는 프로세스 감독 및 복잡한 사례 해결과 같은 고부가가치 전략적 역할에 집중할 수 있습니다.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 프로젝트 MADISON | LG전자 / Alorica Teleservices Inc.</p>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------
+    // 1. 효율성 지표 레이더 차트
+    // ------------------------------
+    const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+    new Chart(efficiencyCtx, {
+      type: 'radar',
+      data: {
+        labels: ['AHT 효율성', '해결 역량', '가동 시간 / 가용성', '확장성', 'KPI 준수'],
+        datasets: [
+          {
+            label: 'Tier-2 AI 상담사',
+            data: [95, 90, 100, 100, 99],
+            backgroundColor: 'rgba(90, 50, 160, 0.2)', // 미적인 다크 퍼플
+            borderColor: 'rgba(90, 50, 160, 0.8)',
+            pointBackgroundColor: 'rgba(90, 50, 160, 1)'
+          },
+          {
+            label: '인간 상담사',
+            data: [70, 80, 85, 30, 75],
+            backgroundColor: 'rgba(140, 180, 90, 0.2)', // 더 밝은 녹색
+            borderColor: 'rgba(140, 180, 90, 0.8)',
+            pointBackgroundColor: 'rgba(140, 180, 90, 1)'
+          }
+        ]
+      },
+      options: {
+        scales: {
+          r: {
+            suggestedMin: 0,
+            suggestedMax: 100,
+            ticks: {
+              display: false
+            },
+            angleLines: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              boxWidth: 15,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          }
+        }
+      }
+    });
+
+    // ------------------------------
+    // 2. 5년간 운영 비용 차트
+    // ------------------------------
+    const costLabels = ['1년차', '2년차', '3년차', '4년차', '5년차'];
+
+    // AI 비용 (누적)
+    const aiYearlyCosts = [
+      65719, // 1년차 (총액의 20%)
+      65719, // 2년차 (총액의 20%)
+      65719, // 3년차 (총액의 20%)
+      65719, // 4년차 (총액의 20%)
+      65719  // 5년차 (총액의 20%)
+    ];
+
+    // 누적 비용 계산
+    const aiCumulativeCosts = [];
+    aiYearlyCosts.reduce((acc, curr, i) => {
+      aiCumulativeCosts[i] = acc + curr;
+      return aiCumulativeCosts[i];
+    }, 0);
+
+    // 인간 상담사 비용 (누적)
+    const humanYearlyCost = 383520; // 68명 상담사의 연간 비용
+    const humanCumulativeCosts = [
+      humanYearlyCost,
+      humanYearlyCost * 2,
+      humanYearlyCost * 3,
+      humanYearlyCost * 4,
+      humanYearlyCost * 5
+    ];
+
+    const costCtx = document.getElementById('costChart').getContext('2d');
+    new Chart(costCtx, {
+      type: 'line',
+      data: {
+        labels: costLabels,
+        datasets: [
+          {
+            label: 'AI 인프라 (USD)',
+            data: aiCumulativeCosts,
+            borderColor: 'rgba(90, 50, 160, 1)', // 다크 퍼플
+            backgroundColor: 'rgba(90, 50, 160, 0.1)',
+            tension: 0.3,
+            fill: true,
+            borderWidth: 3
+          },
+          {
+            label: '인간 상담사 (USD)',
+            data: humanCumulativeCosts,
+            borderColor: 'rgba(140, 180, 90, 1)', // 더 밝은 녹색
+            backgroundColor: 'rgba(140, 180, 90, 0.1)',
+            tension: 0.3,
+            fill: true,
+            borderWidth: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '누적 비용 (USD)',
+              font: {
+                weight: 'bold'
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('ko-KR', {
+                  style: 'decimal',
+                  notation: 'compact',
+                  compactDisplay: 'short'
+                }).format(value);
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              boxWidth: 15,
+              usePointStyle: true,
+              pointStyle: 'rectRounded'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + new Intl.NumberFormat('ko-KR').format(context.parsed.y) + ' USD';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // ------------------------------
+    // 3. 재무적 영향 차트
+    // ------------------------------
+    const impactCtx = document.getElementById('impactChart').getContext('2d');
+    new Chart(impactCtx, {
+      type: 'bar',
+      data: {
+        labels: ['6개월', '1년', '3년', '5년'],
+        datasets: [
+          {
+            label: '비용 절감 (USD)',
+            data: [158901, 317801, 953403, 1589005],
+            backgroundColor: 'rgba(90, 50, 160, 0.7)', // 다크 퍼플
+            borderColor: 'rgba(90, 50, 160, 1)',
+            borderWidth: 1
+          },
+          {
+            label: '수익 증가 (USD)',
+            data: [100000, 400000, 1000000, 1500000],
+            backgroundColor: 'rgba(140, 180, 90, 0.7)', // 더 밝은 녹색
+            borderColor: 'rgba(140, 180, 90, 1)',
+            borderWidth: 1
+          },
+          {
+            label: '총 재무적 이익 (USD)',
+            data: [258901, 717801, 1953403, 3089005],
+            backgroundColor: 'rgba(165, 0, 52, 0.7)', // 헤리티지 레드
+            borderColor: 'rgba(165, 0, 52, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '금액 (USD)',
+              font: {
+                weight: 'bold'
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('ko-KR', {
+                  style: 'decimal',
+                  notation: 'compact',
+                  compactDisplay: 'short'
+                }).format(value);
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              boxWidth: 15,
+              usePointStyle: true,
+              pointStyle: 'rectRounded'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + new Intl.NumberFormat('ko-KR').format(context.parsed.y) + ' USD';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // ------------------------------
+    // 4. 수익 차트 (간소화)
+    // ------------------------------
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+      type: 'line',
+      data: {
+        labels: ['6개월', '1년', '3년', '5년'],
+        datasets: [
+          {
+            label: '수익 성장',
+            data: [100000, 400000, 1000000, 1500000],
+            borderColor: '#3d87bd', // 스카이 블루
+            backgroundColor: 'rgba(61, 135, 189, 0.1)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: '수익 성장',
+              font: {
+                weight: 'bold'
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + new Intl.NumberFormat('ko-KR', {
+                  style: 'decimal',
+                  notation: 'compact',
+                  compactDisplay: 'short'
+                }).format(value) + ' (' + (value / 10000) + '%)';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return '수익: $' + new Intl.NumberFormat('ko-KR').format(context.parsed.y) +
+                       ' (' + (context.parsed.y / 10000) + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
